@@ -1,0 +1,137 @@
+body {
+    margin: 0;
+    font-family: monospace;
+  }
+  
+  #toon-header {
+    display: flex;
+    justify-content: center;
+    background: #22b6e4;
+    opacity: .9;
+    height: 15rem;
+    padding: 1rem;
+  }
+  
+  #toon-collection {
+    margin: 2rem;
+  }
+  
+  .card {
+    text-align: center;
+    border: grey solid 1px;
+    padding: 1rem;
+    width: 15rem;
+    height: 25rem;
+    display: inline-grid;
+    margin: 1rem 2rem;
+    box-shadow: 3px 4px #5271FF
+  }
+  
+  .toon-avatar {
+    justify-self: center;
+    height: 12rem;
+    width: auto;
+  }
+  
+  button {
+    position: relative;
+    background-color: #5271FF;
+    border: none;
+    border-radius: 5px;
+    height: 3rem;
+    width: max-content;
+    color: whitesmoke;
+    font-size: 18px;
+    justify-self: center;
+  }
+  
+  button:hover {
+    background-color: whitesmoke;
+    border: #5271FF solid 1px;
+    color: #5271FF;
+  }
+  
+  .container {
+    padding: 1rem;
+    width: stretch;
+    height: auto;
+    display: none;
+    background: #22b6e4;
+    opacity: .9;
+  }
+  
+  .add-toon-form {
+    width: 80%
+  }
+  
+  .submit {
+    position: relative;
+    background-color: #5271FF;
+    border-radius: 5px;
+    height: 2rem;
+    width: max-content;
+    color: whitesmoke;
+    font-size: 18px;
+    justify-self: center;
+    font-family: monospace;
+    margin: 3px;
+  }
+  
+  .submit:hover {
+    background-color: whitesmoke;
+    border: #5271FF solid 1px;
+    color: #5271FF;
+  }
+  
+  
+  .input-text {
+    border-radius: 5px;
+    height: 2rem;
+    width: 60%;
+    font-size: 18px;
+    font-family: monospace;
+    margin: 3px;
+  }  
+
+  #logo{
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    width: 210px;
+    height: 210px;
+    border: solid;
+    border-color: black;
+    border-radius: 12px;
+  }
+
+  #logo:hover {
+    border-color: whitesmoke;}
+
+  .cardImg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 150px;
+    height: 150px
+  }
+
+  .network-buttons{
+    display: block;
+    margin: auto;
+    padding: auto;
+    width:auto;
+    height:auto;
+  }
+ 
+  .network-buttons img {
+    max-width: 15vw;
+    max-height: 15vh;
+  }
+
+  .collection {
+    text-align: center;
+  }
+
+  #addToonText{
+    color: whitesmoke
+  }
