@@ -135,3 +135,7 @@ body {
   #addToonText{
     color: whitesmoke
   }
+
+  .buttons-container button {
+    margin-right: 10px; /* Adjust the margin as needed */
+  }
