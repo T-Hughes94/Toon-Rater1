@@ -1,56 +1,79 @@
+// Constants
 const toonDB = 'http://localhost:4000/toons';
+
+// State
 let addToon = false;
 
+// DOM Elements
+const addBtn = document.querySelector("#new-toon-btn");
+const toonFormContainer = document.querySelector(".container");
+const toonCollection = document.getElementById('toon-collection');
+const logoHome = document.getElementById('logo');
+const cnButton = document.getElementById('cartoon-network');
+const nickelodeonButton = document.getElementById('nickelodeon');
+const disneyButton = document.getElementById('disney');
+const otherButton = document.getElementById('other');
+
+// Event Listeners
 document.addEventListener("DOMContentLoaded", () => {
-  const addBtn = document.querySelector("#new-toon-btn");
-  const toonFormContainer = document.querySelector(".container");
-
-  addBtn.addEventListener("click", () => {
-    addToon = !addToon;
-    if (addToon) {
-      toonFormContainer.style.display = "block";
-
-      document.querySelector('.add-toon-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newName = e.target.name.value;
-        const newImg = e.target.image.value;
-        const newNetwork = e.target.network.value;
-        document.querySelector('.add-toon-form').reset();
-
-        fetch(toonDB, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json"
-          },
-          body: JSON.stringify({
-            "title": newName,
-            "network": newNetwork,
-            "image": newImg,
-            "likes": 0
-          })
-        })
-          .then(r => r.json());
-      });
-    } else {
-      toonFormContainer.style.display = "none";
-    }
-  });
+  addBtn.addEventListener("click", toggleToonForm);
+  fetchToons();
 });
 
-fetch(toonDB)
-  .then(r => r.json())
-  .then(toons => {
-    toons.sort((a, b) => b.likes - a.likes);
-    const top3Toons = toons.slice(0, 3);
-    top3Toons.forEach(toon => renderCard(toon));
-  });
+logoHome.addEventListener('click', returnToLeaderboard);
+cnButton.addEventListener('click', () => filterToonsByNetwork("Cartoon Network"));
+nickelodeonButton.addEventListener('click', () => filterToonsByNetwork("Nickelodeon"));
+disneyButton.addEventListener('click', () => filterToonsByNetwork("Disney"));
+otherButton.addEventListener('click', () => filterToonsByNetwork("Other"));
+
+// Functions
+function toggleToonForm() {
+  addToon = !addToon;
+  if (addToon) {
+    toonFormContainer.style.display = "block";
+    document.querySelector('.add-toon-form').addEventListener('submit', handleToonFormSubmit);
+  } else {
+    toonFormContainer.style.display = "none";
+  }
+}
+
+function handleToonFormSubmit(e) {
+  e.preventDefault();
+  const newName = e.target.name.value;
+  const newImg = e.target.image.value;
+  const newNetwork = e.target.network.value;
+  document.querySelector('.add-toon-form').reset();
+
+  fetch(toonDB, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      "title": newName,
+      "network": newNetwork,
+      "image": newImg,
+      "likes": 0
+    })
+  })
+    .then(r => r.json());
+}
+
+function fetchToons() {
+  fetch(toonDB)
+    .then(r => r.json())
+    .then(toons => {
+      toons.sort((a, b) => b.likes - a.likes);
+      const top3Toons = toons.slice(0, 3);
+      top3Toons.forEach(renderCard);
+    });
+}
 
 function renderCard(toon) {
-  const toonCollection = document.getElementById('toon-collection');
   const cardDiv = document.createElement('div');
   cardDiv.className = 'card';
-  cardDiv.setAttribute('data-toon-id', toon.id); // Added data-toon-id attribute
+  cardDiv.setAttribute('data-toon-id', toon.id);
 
   const toonName = document.createElement('h2');
   toonName.textContent = toon['title'];
@@ -65,92 +88,38 @@ function renderCard(toon) {
   const buttonsContainer = document.createElement('div');
   buttonsContainer.className = 'buttons-container';
 
-  const likesButton = document.createElement('button');
-  likesButton.textContent = "+";
-  likesButton.className = 'like-btn';
-  likesButton.id = toon['likes'];
+  const likesButton = createButton("+", 'like-btn', () => handleVoteButtonClick(toon, 1));
+  const spaceBetweenButtons = document.createTextNode('\u00A0\u00A0'); // Non-breaking space
+  const dislikeButton = createButton("-", 'dislike-btn', () => handleVoteButtonClick(toon, -1));
 
-  const dislikeButton = document.createElement('button');
-  dislikeButton.textContent = "-";
-  dislikeButton.className = 'dislike-btn';
-
-  const deleteButton = document.createElement('button');
-  deleteButton.textContent = 'Delete';
-  deleteButton.className = 'delete-btn';
+  const deleteButton = createButton("Delete", 'delete-btn', () => deleteToon(toon.id));
   deleteButton.style.backgroundColor = 'red'; // Set background color to red
-  
-  buttonsContainer.append(likesButton, dislikeButton);
+
+  buttonsContainer.append(likesButton, spaceBetweenButtons, dislikeButton);
   cardDiv.append(toonName, img, likeCount, buttonsContainer, deleteButton);
   toonCollection.append(cardDiv);
-
-  // Adding Like button functionality
-  likesButton.addEventListener('click', () => {
-    toon['likes'] = toon['likes'] + 1;
-    fetch(`${toonDB}/${toon.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(toon)
-    })
-      .then(r => r.json())
-      .then(() => likeCount.textContent = "Total Votes:  " + toon['likes']);
-  });
-
-  dislikeButton.addEventListener('click', () => {
-    toon['likes'] = toon['likes'] - 1;
-    fetch(`${toonDB}/${toon.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(toon)
-    })
-      .then(r => r.json())
-      .then(() => likeCount.textContent = "Total Votes:  " + toon['likes']);
-  });
-
-  // Add event listener for delete button
-  deleteButton.addEventListener('click', () => {
-    deleteToon(toon.id);
-  });
 }
 
-const logoHome = document.getElementById('logo');
-const cnButton = document.getElementById('cartoon-network');
-const nickelodeonButton = document.getElementById('nickelodeon');
-const disneyButton = document.getElementById('disney');
-const otherButton = document.getElementById('other');
-
-logoHome.addEventListener('click', () => returnToLeaderboard());
-cnButton.addEventListener('click', () => filterToonsByNetwork("Cartoon Network"));
-nickelodeonButton.addEventListener('click', () => filterToonsByNetwork("Nickelodeon"));
-disneyButton.addEventListener('click', () => filterToonsByNetwork("Disney"));
-otherButton.addEventListener('click', () => filterToonsByNetwork("Other"));
-
-function returnToLeaderboard(likes) {
-  const toonCollection = document.getElementById('toon-collection');
-  toonCollection.innerHTML = '';
-  fetch(toonDB)
-    .then(r => r.json())
-    .then(toons => {
-      toons.sort((a, b) => b.likes - a.likes);
-      const top3Toons = toons.slice(0, 3);
-      top3Toons.forEach(toon => renderCard(toon));
-    });
+function createButton(text, className, clickHandler) {
+  const button = document.createElement('button');
+  button.textContent = text;
+  button.className = className;
+  button.addEventListener('click', clickHandler);
+  return button;
 }
 
-function filterToonsByNetwork(network) {
-  const toonCollection = document.getElementById('toon-collection');
-  toonCollection.innerHTML = '';
-  fetch(toonDB)
+function handleVoteButtonClick(toon, voteValue) {
+  toon['likes'] += voteValue;
+  fetch(`${toonDB}/${toon.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify(toon)
+  })
     .then(r => r.json())
-    .then(toons => {
-      const filteredToons = toons.filter(toon => toon.network === network);
-      filteredToons.forEach(toon => renderCard(toon));
-    });
+    .then(() => renderCard(toon)); // Update like count on the card
 }
 
 function deleteToon(toonId) {
@@ -172,3 +141,17 @@ function deleteToon(toonId) {
     });
 }
 
+function returnToLeaderboard() {
+  toonCollection.innerHTML = '';
+  fetchToons();
+}
+
+function filterToonsByNetwork(network) {
+  toonCollection.innerHTML = '';
+  fetch(toonDB)
+    .then(r => r.json())
+    .then(toons => {
+      const filteredToons = toons.filter(toon => toon.network === network);
+      filteredToons.forEach(renderCard);
+    });
+}
